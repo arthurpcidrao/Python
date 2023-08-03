@@ -1,4 +1,4 @@
-from funções_trabalho_AV3 import *
+from functions_matrix import *
 
 question = 0
 pros = 1
