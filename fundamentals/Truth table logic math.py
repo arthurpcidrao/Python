@@ -11,7 +11,7 @@ def sentense_analysis (sentense):
     print(array)
 
 def lexical_analysis (equation):
-    alphabet = "abcdefghijklmnopqrstuvwxyz ~^→↔()"
+    alphabet = "abcdefghijklmnopqrstuvwxyzç ~^→↔()"
     sum = 0
 
     for logic in (equation):
@@ -21,10 +21,21 @@ def lexical_analysis (equation):
 
     if (sum == len(equation)):
         print("Os símbolos estão corretos")
+
+        remove_space(equation)
     
     else:
         print("Os símbolos estão errados")
 
+def remove_space (equation):
+    count = 0
+    for letter in (equation):
+        if (letter == ' '):
+            count = count + 1
+    
+    equation = equation.replace(' ', '',count)
+    print(equation)
+        
 
 #sentense = input("Digite uma frase: ")
 equation = input("Digite uma equação lógica: ")
