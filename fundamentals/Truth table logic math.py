@@ -33,12 +33,55 @@ def remove_space (equation):
         if (letter == ' '):
             count = count + 1
     
-    equation = equation.replace(' ', '',count)
-    print(equation)
+    equation_m = equation.replace(' ', '',count)
+    print(equation_m)
+
+    verificacao(equation_m)
+
+
+def verificacao (equation_m):
+    # verificação do ():
+    test = True    
+    aux = 0
+    i = 0
+    sum_enter = 0
+    sum_out = 0
+    sum_gen = sum_enter + sum_out
+    
+    while (aux != 1):
+
+        if (equation_m[i] == '(' ):
+            sum_enter = sum_enter + 1
+            j = i
+            while(aux != 1):
+                if (equation_m[j] == ')' ):
+                    sum_out = sum_out + 1
+                    break
+
+                if (j == len(equation_m) - 1):
+                    break
+            if (sum_enter == sum_out):
+                test = True
+            else:
+                test = False      
+
+        elif (equation_m[i] == ')' ):
+            sum_out = sum_out + 1
+            if ((sum_enter == 0) and (sum_out > 0)):
+                test = False
+
+        if (i == len(equation_m) - 1):
+            aux = 1        
+    
+    print(test)
         
+
+
 
 #sentense = input("Digite uma frase: ")
 equation = input("Digite uma equação lógica: ")
 
 #sentense_analysis(sentense)
 lexical_analysis(equation)
+
+print(equation)
