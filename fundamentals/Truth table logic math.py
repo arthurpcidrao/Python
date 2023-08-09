@@ -15,7 +15,7 @@ def sentense_analysis (sentense):
 
 
 def lexical_analysis (equation):
-    alphabet = "abcdefghijklmnopqrstuvwxyzç ~^→↔()"
+    alphabet = "abcdefghijklmnopqrstuvwxyzç ∧~^→↔()"
     sum = 0
 
     for logic in (equation):
@@ -87,6 +87,7 @@ def verificacao (equation_m):
             test = False
     
     print(test)
+    #(A → B) ∧ (B → A) ainda não reconhece como correto
         
 
 
