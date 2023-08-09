@@ -41,37 +41,39 @@ def remove_space (equation):
 
 def verificacao (equation_m):
     # verificação do ():
-    test = True    
-    aux = 0
-    i = 0
+    test = True
     sum_enter = 0
     sum_out = 0
-    sum_gen = sum_enter + sum_out
+    pares = 0
+    pos_par_enter = []
+    pos_par_out = []
     
-    while (aux != 1):
+    j = 0
+    for letter in (equation_m):
+        if (letter == '(' ):
+            sum_enter = sum_enter+1
+            pos_par_enter.append(j)
 
-        if (equation_m[i] == '(' ):
-            sum_enter = sum_enter + 1
-            j = i
-            while(aux != 1):
-                if (equation_m[j] == ')' ):
-                    sum_out = sum_out + 1
-                    break
+        if (letter == ')' ):
+            sum_out = sum_out+1
+            pos_par_out.append(j)
+        
+        j = j + 1
+    
+    if (sum_enter != sum_out):
+        test = False
+    
+    else:
+        num = sum_enter
 
-                if (j == len(equation_m) - 1):
-                    break
-            if (sum_enter == sum_out):
-                test = True
-            else:
-                test = False      
-
-        elif (equation_m[i] == ')' ):
-            sum_out = sum_out + 1
-            if ((sum_enter == 0) and (sum_out > 0)):
-                test = False
-
-        if (i == len(equation_m) - 1):
-            aux = 1        
+        for i in range(num):
+            if (pos_par_enter[i] < pos_par_out[num - 1 - i]):
+                pares = pares + 1
+        
+        if (num == pares):
+            test = True
+        else:
+            test = False
     
     print(test)
         
