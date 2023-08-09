@@ -10,6 +10,10 @@ def sentense_analysis (sentense):
 
     print(array)
 
+
+
+
+
 def lexical_analysis (equation):
     alphabet = "abcdefghijklmnopqrstuvwxyzç ~^→↔()"
     sum = 0
@@ -27,6 +31,10 @@ def lexical_analysis (equation):
     else:
         print("Os símbolos estão errados")
 
+
+
+
+
 def remove_space (equation):
     count = 0
     for letter in (equation):
@@ -37,6 +45,9 @@ def remove_space (equation):
     print(equation_m)
 
     verificacao(equation_m)
+
+
+
 
 
 def verificacao (equation_m):
@@ -77,6 +88,7 @@ def verificacao (equation_m):
     
     print(test)
         
+
 
 
 
