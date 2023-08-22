@@ -1,3 +1,5 @@
+alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ ∨V∧~^→↔()"
+
 def print_matrix (matrix, scalar):
     '''
     Função usada para imprimir na tela o formato de uma matriz
@@ -17,16 +19,19 @@ def qtd_variables(equation: str) -> int:
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
     '''
-    variables = 0
+    variables = []
 
-    alphabet = "abcdefghijklmnopqrstuwxyz"
+    alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
 
     for logic in (equation):
         for letter in (alphabet):
             if (logic == letter):
-                variables = variables + 1
+                variables.append(logic)
     
-    return variables
+    vetor_sem_duplicatas = list(set(variables))  # remove duplicatas
+    vetor_sem_duplicatas.sort() # ordena as variáveis
+    
+    return len(vetor_sem_duplicatas)
 
 
 
@@ -47,28 +52,6 @@ def generate_combinations(num_variables):
     
     return combinations
 
-
-'''
-def results_truth_table(combinations):
-    
-    resp = [None]*len(combinations)
-    vector = [None]*len(combinations[0])
-
-    for i in range(len(combinations[0])):
-        vector[i] = [None]*len(combinations)
-    
-    for i in range(len(vector)):
-        for j in range(len(vector[i])):
-            vector[i][j] = combinations[j][i]
-    
-    for i in range(len(resp)):
-
-        resp[i] = bool(vector[i][0] and vector[i][1])
-
-    return resp
-
-'''
-alphabet = "abcdefghijklmnopqrstuvwxyzç ∨V∧~^→↔()"
 
 def lexical_analysis (equation, alphabet):
     sum = 0
@@ -92,10 +75,9 @@ def remove_space (equation):
         if (letter == ' '):
             count = count + 1
     
-    equation_m = equation.replace(' ', '',count)
-    print(equation_m)
+    equation = equation.replace(' ', '',count)
+    return equation
 
-    is_well_formed_formula(equation_m)
 
 
 
@@ -129,15 +111,13 @@ def is_well_formed_formula(input_formula):
 
 
 
-#sentense = input("Digite uma frase: ")
 equation = input("Digite uma equação lógica: ")
 
-#sentense_analysis(sentense)
-#lexical_analysis(equation, alphabet)
-
 print(equation)
-#result_syntax = is_well_formed_formula(equation)
-#print("Analisador Sintático:", result_syntax)
+
+equation = remove_space(equation)
+print(equation)
+
 
 equacao_valida = bool(lexical_analysis(equation,alphabet) and is_well_formed_formula(equation))
 print("Analisador equação:", equacao_valida)
@@ -146,12 +126,49 @@ num_variables = qtd_variables(equation)
 combinations = generate_combinations(num_variables)
 
 print_matrix(combinations, 1)
-'''resp = results_truth_table(combinations)
 
-for i in range(len(resp)):
-    print(resp)
-'''
 
 print(combinations)
 
+
+pos_final = 0
+i = 0
+equation_vetor = list(equation)
+
+for var in (equation_vetor):
+    if (var == ')' ):
+        pos_final = i
+    i = i + 1
+
+if (pos_final == 0):
+    pass
+else:
+    vet_invertido = equation[::-1]
+    pos_inicial = 0
+    i = 0
+    for var in (vet_invertido):
+        if(var == '(' ):
+            pos_inicial = (len(equation)-1) - i
+        i = i + 1
+
+    j = pos_inicial
+    vetor_especifico = []
+
+    for var in (equation[pos_inicial:]):
+        if (j > pos_final):
+            break
+
+        vetor_especifico.append(var)
+
+        j = j + 1
+
+'''
+ ATÉ O MOMENTO EU CONSEGUI SEPARAR A EXPRESSÃO DO PARENTESE DA PRINCIPAL, AGORA PRECISO RESOLVER A EQUAÇÃO
+ MONTANDO 2 PILHAS. 1 PARA AS VARIÁVEIS E A OUTRA PARA OS SÍMBOLOS
+'''
+
+
 # toda vez que eu entrar em um novo conjunto de parenteses, eu devo usar recursão da função para ela começar novamente
+
+# PILHA: pensar em um vetor estilo pilha de pratos (só consigo colocar e tirar por cima)
+# FILA: pensar em fila de banco (só consigo adicionar no fim da fila e retirar no começo da fila)
