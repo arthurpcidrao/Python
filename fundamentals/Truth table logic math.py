@@ -1,4 +1,5 @@
-alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ ∨V∧~^→↔()"
+alphabet_plus = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ ∨V∧~^→↔()"
+alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
 
 def print_matrix (matrix, scalar):
     '''
@@ -15,7 +16,7 @@ def print_matrix (matrix, scalar):
 
 
 
-def qtd_variables(equation: str) -> int:
+def qtd_variables(equation: str, alphabet) -> int:
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
     '''
@@ -53,11 +54,11 @@ def generate_combinations(num_variables):
     return combinations
 
 
-def lexical_analysis (equation, alphabet):
+def lexical_analysis (equation, alphabet_plus):
     sum = 0
 
     for logic in (equation):
-        for letter in (alphabet):
+        for letter in (alphabet_plus):
             if (logic == letter):
                 sum = sum + 1
 
@@ -119,10 +120,10 @@ equation = remove_space(equation)
 print(equation)
 
 
-equacao_valida = bool(lexical_analysis(equation,alphabet) and is_well_formed_formula(equation))
+equacao_valida = bool(lexical_analysis(equation,alphabet_plus) and is_well_formed_formula(equation))
 print("Analisador equação:", equacao_valida)
 
-num_variables = qtd_variables(equation)
+num_variables = qtd_variables(equation, alphabet)
 combinations = generate_combinations(num_variables)
 
 print_matrix(combinations, 1)
@@ -130,6 +131,8 @@ print_matrix(combinations, 1)
 
 print(combinations)
 
+##################################################################################################
+#  ENTENDER COMO TRANSFORMAR EM FUNÇÃO DEPOIS
 
 pos_final = 0
 i = 0
@@ -161,6 +164,21 @@ else:
         vetor_especifico.append(var)
 
         j = j + 1
+    
+
+pilha_simb = []
+pilha_var = []
+
+for logic in (equation_vetor):
+    for letter in (alphabet):
+        if (logic == letter):
+            pilha_var.append(logic)
+        else:
+            pilha_simb.append(logic)
+
+
+
+
 
 '''
  ATÉ O MOMENTO EU CONSEGUI SEPARAR A EXPRESSÃO DO PARENTESE DA PRINCIPAL, AGORA PRECISO RESOLVER A EQUAÇÃO
