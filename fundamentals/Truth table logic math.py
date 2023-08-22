@@ -1,17 +1,22 @@
-'''def sentense_analysis (sentense):
+def print_matrix (matrix, scalar):
+    '''
+    Função usada para imprimir na tela o formato de uma matriz
+    '''
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            
+            if (j < len(matrix[i]) - 1):
+                print(f"{matrix[i][j]*scalar}", end = '  |  ')
+            else:
+                print(f"{matrix[i][j]*scalar}")
 
-    array = sentense.split(' ')
-    i = 0
-    for logic in (array):
-        
-        if (logic == "ou"):
-            array[i] = 'v'
-        i = i+1
 
-    print(array)
-'''
 
-def qtd_variables(equation):
+
+def qtd_variables(equation: str) -> int:
+    '''
+    Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
+    '''
     variables = 0
 
     alphabet = "abcdefghijklmnopqrstuwxyz"
@@ -24,19 +29,12 @@ def qtd_variables(equation):
     return variables
 
 
-def print_matrix (matrix, scalar):
-
-    for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            
-            if (j < len(matrix[i]) - 1):
-                print(f"{matrix[i][j]*scalar}", end = '  |  ')
-            else:
-                print(f"{matrix[i][j]*scalar}")
-
 
 
 def generate_combinations(num_variables):
+    '''
+    Função que realiza o início da tabela verdade e retorna a matriz inicial.
+    '''
     combinations = []
     max_value = 2 ** num_variables
 
@@ -50,7 +48,7 @@ def generate_combinations(num_variables):
     return combinations
 
 
-
+'''
 def results_truth_table(combinations):
     
     resp = [None]*len(combinations)
@@ -69,11 +67,10 @@ def results_truth_table(combinations):
 
     return resp
 
+'''
+alphabet = "abcdefghijklmnopqrstuvwxyzç ∨V∧~^→↔()"
 
-
-
-def lexical_analysis (equation):
-    alphabet = "abcdefghijklmnopqrstuvwxyzç ∨V∧~^→↔()"
+def lexical_analysis (equation, alphabet):
     sum = 0
 
     for logic in (equation):
@@ -82,14 +79,10 @@ def lexical_analysis (equation):
                 sum = sum + 1
 
     if (sum == len(equation)):
-        print("Os símbolos estão corretos")
-
-        remove_space(equation)
+        return True
     
     else:
-        print("Os símbolos estão errados")
-
-
+        return False
 
 
 
@@ -102,24 +95,26 @@ def remove_space (equation):
     equation_m = equation.replace(' ', '',count)
     print(equation_m)
 
-    #is_well_formed_formula(equation_m)
+    is_well_formed_formula(equation_m)
 
 
 
-'''
-def is_well_formed_formula(equation_m):
+def is_well_formed_formula(input_formula):
+    # Função para remover os espaços em branco da fórmula
+    def remove_spaces(formula):
+        return formula.replace(" ", "")
     
-    equation_m = remove_space(equation_m)
+    input_formula = remove_spaces(input_formula)
     stack = []  # Usaremos uma pilha para verificar a correspondência de parênteses
     
     # Itera sobre cada caractere na fórmula de entrada
     i = 0  # Variável para manter o índice atual
-    while i < len(equation_m):
-        char = equation_m[i]
+    while i < len(input_formula):
+        char = input_formula[i]
         
         if char == '(':  # Se encontrar um parêntese de abertura
             # Verifica se o próximo caractere é um parêntese de fechamento
-            next_char = equation_m[i + 1] if i + 1 < len(equation_m) else ''
+            next_char = input_formula[i + 1] if i + 1 < len(input_formula) else ''
             if next_char == ')':
                 return False  # Parêntese vazio encontrado
             stack.append('(')  # Adiciona à pilha
@@ -132,27 +127,31 @@ def is_well_formed_formula(equation_m):
     
     return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
-# Exemplo de input
-'''
 
 
 #sentense = input("Digite uma frase: ")
 equation = input("Digite uma equação lógica: ")
 
 #sentense_analysis(sentense)
-lexical_analysis(equation)
+#lexical_analysis(equation, alphabet)
 
 print(equation)
+#result_syntax = is_well_formed_formula(equation)
+#print("Analisador Sintático:", result_syntax)
 
+equacao_valida = bool(lexical_analysis(equation,alphabet) and is_well_formed_formula(equation))
+print("Analisador equação:", equacao_valida)
 
 num_variables = qtd_variables(equation)
 combinations = generate_combinations(num_variables)
 
 print_matrix(combinations, 1)
-resp = results_truth_table(combinations)
+'''resp = results_truth_table(combinations)
 
 for i in range(len(resp)):
     print(resp)
-
+'''
 
 print(combinations)
+
+# toda vez que eu entrar em um novo conjunto de parenteses, eu devo usar recursão da função para ela começar novamente
