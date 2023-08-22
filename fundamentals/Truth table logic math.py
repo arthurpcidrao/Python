@@ -1,4 +1,4 @@
-def sentense_analysis (sentense):
+'''def sentense_analysis (sentense):
 
     array = sentense.split(' ')
     i = 0
@@ -9,13 +9,71 @@ def sentense_analysis (sentense):
         i = i+1
 
     print(array)
+'''
 
+def qtd_variables(equation):
+    variables = 0
+
+    alphabet = "abcdefghijklmnopqrstuwxyz"
+
+    for logic in (equation):
+        for letter in (alphabet):
+            if (logic == letter):
+                variables = variables + 1
+    
+    return variables
+
+
+def print_matrix (matrix, scalar):
+
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            
+            if (j < len(matrix[i]) - 1):
+                print(f"{matrix[i][j]*scalar}", end = '  |  ')
+            else:
+                print(f"{matrix[i][j]*scalar}")
+
+
+
+def generate_combinations(num_variables):
+    combinations = []
+    max_value = 2 ** num_variables
+
+    for i in range(max_value):
+        combination = []
+        for j in range(num_variables):
+            bit = (i // (2 ** j)) % 2
+            combination.append(bit)
+        combinations.append(combination)
+    
+    return combinations
+
+
+
+def results_truth_table(combinations):
+    
+    resp = [None]*len(combinations)
+    vector = [None]*len(combinations[0])
+
+    for i in range(len(combinations[0])):
+        vector[i] = [None]*len(combinations)
+    
+    for i in range(len(vector)):
+        for j in range(len(vector[i])):
+            vector[i][j] = combinations[j][i]
+    
+    for i in range(len(resp)):
+
+        resp[i] = bool(vector[i][0] and vector[i][1])
+
+    return resp
 
 
 
 
 def lexical_analysis (equation):
-    alphabet = "abcdefghijklmnopqrstuvwxyzç ∧~^→↔()"
+    alphabet = "abcdefghijklmnopqrstuvwxyzç ∨V∧~^→↔()"
     sum = 0
 
     for logic in (equation):
@@ -44,53 +102,38 @@ def remove_space (equation):
     equation_m = equation.replace(' ', '',count)
     print(equation_m)
 
-    verificacao(equation_m)
+    #is_well_formed_formula(equation_m)
 
 
 
-
-
-def verificacao (equation_m):
-    # verificação do ():
-    test = True
-    sum_enter = 0
-    sum_out = 0
-    pares = 0
-    pos_par_enter = []
-    pos_par_out = []
+'''
+def is_well_formed_formula(equation_m):
     
-    j = 0
-    for letter in (equation_m):
-        if (letter == '(' ):
-            sum_enter = sum_enter+1
-            pos_par_enter.append(j)
-
-        if (letter == ')' ):
-            sum_out = sum_out+1
-            pos_par_out.append(j)
+    equation_m = remove_space(equation_m)
+    stack = []  # Usaremos uma pilha para verificar a correspondência de parênteses
+    
+    # Itera sobre cada caractere na fórmula de entrada
+    i = 0  # Variável para manter o índice atual
+    while i < len(equation_m):
+        char = equation_m[i]
         
-        j = j + 1
-    
-    if (sum_enter != sum_out):
-        test = False
-    
-    else:
-        num = sum_enter
-
-        for i in range(num):
-            if (pos_par_enter[i] < pos_par_out[num - 1 - i]):
-                pares = pares + 1
+        if char == '(':  # Se encontrar um parêntese de abertura
+            # Verifica se o próximo caractere é um parêntese de fechamento
+            next_char = equation_m[i + 1] if i + 1 < len(equation_m) else ''
+            if next_char == ')':
+                return False  # Parêntese vazio encontrado
+            stack.append('(')  # Adiciona à pilha
+        elif char == ')':  # Se encontrar um parêntese de fechamento
+            if len(stack) == 0 or stack[-1] != '(':  # Verifica se a pilha está vazia ou não corresponde ao esperado
+                return False  # Se não corresponder, a análise sintática falha
+            stack.pop()  # Se corresponder, remove o último parêntese de abertura da pilha
         
-        if (num == pares):
-            test = True
-        else:
-            test = False
+        i += 1  # Incrementa o índice
     
-    print(test)
-    #(A → B) ∧ (B → A) ainda não reconhece como correto
-        
+    return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
-
+# Exemplo de input
+'''
 
 
 #sentense = input("Digite uma frase: ")
@@ -100,3 +143,16 @@ equation = input("Digite uma equação lógica: ")
 lexical_analysis(equation)
 
 print(equation)
+
+
+num_variables = qtd_variables(equation)
+combinations = generate_combinations(num_variables)
+
+print_matrix(combinations, 1)
+resp = results_truth_table(combinations)
+
+for i in range(len(resp)):
+    print(resp)
+
+
+print(combinations)
