@@ -1,4 +1,4 @@
-alphabet_plus = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ ∨V∧~^→↔()"
+alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ v∨V∧~^→↔()"
 alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
 
 def print_matrix (matrix, scalar):
@@ -134,47 +134,62 @@ print(combinations)
 ##################################################################################################
 #  ENTENDER COMO TRANSFORMAR EM FUNÇÃO DEPOIS
 
-pos_final = 0
-i = 0
-equation_vetor = list(equation)
+def op_parentese (equation):
 
-for var in (equation_vetor):
-    if (var == ')' ):
-        pos_final = i
-    i = i + 1
-
-if (pos_final == 0):
-    pass
-else:
-    vet_invertido = equation[::-1]
-    pos_inicial = 0
+    pos_final = 0
     i = 0
-    for var in (vet_invertido):
-        if(var == '(' ):
-            pos_inicial = (len(equation)-1) - i
+    equation_vetor = list(equation)
+
+    for var in (equation_vetor):
+        if (var == ')' ):
+            pos_final = i
         i = i + 1
 
-    j = pos_inicial
-    vetor_especifico = []
+    if (pos_final == 0):
+        
+        return equation_vetor
 
-    for var in (equation[pos_inicial:]):
-        if (j > pos_final):
-            break
+    else:
+        vet_invertido = equation[::-1]
+        pos_inicial = 0
+        i = 0
+        for var in (vet_invertido):
+            if(var == '(' ):
+                pos_inicial = (len(equation)-1) - i
+            i = i + 1
 
-        vetor_especifico.append(var)
+        j = pos_inicial
+        vetor_especifico = equation[pos_inicial:pos_final+1]
 
-        j = j + 1
+        return vetor_especifico
+
+
+
+
+
+def pilhas (vetor_especifico):
+
+    pilha_simb = []
+    pilha_var = []
+
+    for logic in (vetor_especifico):
+        for letter in (alphabet):
+            if (logic == letter):
+                pilha_var.append(logic)
+            else:
+                pilha_simb.append(logic)
+
     
+    # pilha_var , pilha_simb
+    #while (len(pilha_var) > 0 and len(pilha_simb) > 0):
 
-pilha_simb = []
-pilha_var = []
 
-for logic in (equation_vetor):
-    for letter in (alphabet):
-        if (logic == letter):
-            pilha_var.append(logic)
-        else:
-            pilha_simb.append(logic)
+def op_pilhas (pilha_var, pilha_simb):
+    var_i = pilha_var.pop()
+    simb = pilha_simb.pop()
+    var_f = pilha_var.pop()
+
+
 
 
 
