@@ -57,7 +57,7 @@ def print_matrix (matrix, scalar):
 
 
 
-def qtd_variables(equation: str) -> int:
+def qtd_variables(equation):
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
     '''
@@ -71,7 +71,7 @@ def qtd_variables(equation: str) -> int:
     vetor_sem_duplicatas = list(set(variables))  # remove duplicatas
     vetor_sem_duplicatas.sort() # ordena as variáveis
     
-    return len(vetor_sem_duplicatas)
+    return vetor_sem_duplicatas
 
 
 
@@ -121,7 +121,7 @@ def qtd_operacoes (equation):
     
     for i in equation:
         for j in simbolos:
-            if ((i == j) and (i != '~')):
+            if (i == j):
                 operacoes = operacoes + 1
     
     return operacoes
@@ -185,19 +185,76 @@ def is_well_formed_formula(input_formula):
 
 
 
-equation = input("Digite uma equação lógica: ")
+def analise (combination_n, combination_t, equation):
+    pos_final = 0
+    i = 0
 
-print(remove_space(equation))
+    pilha_var = []
+    pilha_simb = []
+
+    for var in (equation):
+        if (var == ')' ):
+            pos_final = i
+            break
+        i = i + 1
+    
+    if (pos_final == 0):
+        
+        parcial_equation = equation
+
+    else:
+        i = 0
+        for var in (equation[pos_final::-1]):
+            if (var == '(' ):
+                pos_inicial = (len(equation[pos_final::-1]) - 1) - i
+                break
+            
+            for simb in (simbolos):
+                if (simb == var):
+                    pilha_simb.append(var)
+            for letter in (alphabet):
+                if (letter == var):
+                    pilha_var.append(var)
+
+            i = i + 1
+    
+        parcial_equation = equation[pos_inicial:pos_final+1]
+        #print(pilha_simb)
+        #print(pilha_var)
+
+        
+
+        equation = equation[:pos_inicial] + 'i' + equation[pos_final+1:]
+
+
+    
+    return equation
+
+        
+
+
+
+
+
+
+
+equation = input("Digite uma equação lógica: ")
+equation = remove_space(equation)
+print(equation)
 
 equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation))
 print(f"A equação é válida: {equacao_valida}")
 
-num_variables = qtd_variables(equation)
-combinations = generate_combinations(num_variables)
+variables = qtd_variables(equation)
+num_variables = len(variables)
+combinations_n = generate_combinations(num_variables)
+combinations_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
 
-print_matrix(combinations, 1)
+print_matrix(combinations_n, 1)
+qtd = qtd_operacoes(equation)
+print(qtd)
 
-combinations_t = read_matrix_T(len(combinations), len(combinations[0]), combinations)
 
-print(combinations)
+print(combinations_n)
 print(combinations_t)
+print(analise(0,0,equation))
