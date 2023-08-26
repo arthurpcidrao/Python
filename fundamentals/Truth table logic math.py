@@ -1,5 +1,48 @@
 alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ v∨V∧~^→↔()"
 alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
+simbolos = "∨V∧~^→↔v"
+simbolos_plus = "∨V∧~^→↔v()"
+
+
+
+def realizar_operacao(operacao, valor1, valor2):
+    if (operacao == '∧') or (operacao == '^'):
+        return conjuncao(valor1, valor2)
+    
+    elif (operacao == '∨') or (operacao == 'V') or (operacao == 'v'):
+        return disjuncao(valor1, valor2)
+    
+    elif operacao == '→':
+        return condicional(valor1, valor2)
+    
+    elif operacao == '↔':
+        return bicondicional(valor1, valor2)
+    
+    elif operacao == '~':
+        return negacao(valor1)
+    
+    else:
+        return valor2
+
+
+
+def conjuncao(valor1, valor2):
+    return valor1 and valor2
+
+def disjuncao(valor1, valor2):
+    return valor1 or valor2
+
+def condicional(valor1, valor2):
+    return not valor1 or valor2
+
+def bicondicional(valor1, valor2):
+    return (not valor1 or valor2) and (not valor2 or valor1)
+
+def negacao(valor):
+    return not valor
+
+
+
 
 def print_matrix (matrix, scalar):
     '''
@@ -16,13 +59,11 @@ def print_matrix (matrix, scalar):
 
 
 
-def qtd_variables(equation: str, alphabet) -> int:
+def qtd_variables(equation: str) -> int:
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
     '''
     variables = []
-
-    alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
 
     for logic in (equation):
         for letter in (alphabet):
@@ -34,6 +75,21 @@ def qtd_variables(equation: str, alphabet) -> int:
     
     return len(vetor_sem_duplicatas)
 
+
+
+def quais_variaveis(equacao: str) -> int:
+    
+    variables = []
+
+    for logic in (equacao):
+        for letter in (alphabet):
+            if (logic == letter):
+                variables.append(logic)
+    
+    vetor_sem_duplicatas = list(set(variables))  # remove duplicatas
+    vetor_sem_duplicatas.sort() # ordena as variáveis
+    
+    return vetor_sem_duplicatas
 
 
 
@@ -53,8 +109,67 @@ def generate_combinations(num_variables):
     
     return combinations
 
+def qtd_operacoes (equation):
+    operacoes = 0
+    
+    for i in equation:
+        for j in simbolos:
+            if ((i == j) and (i != '~')):
+                operacoes = operacoes + 1
+    
+    return operacoes
 
-def lexical_analysis (equation, alphabet_plus):
+
+
+
+def analise_tab_verdade (equacao, variaveis, num_variables, operacoes):
+
+    combinations = generate_combinations(num_variables)
+
+    tabela_verdade = []
+
+    for combination in combinations:
+        resultado = avaliar(equacao, variaveis, combination)
+        tabela_verdade.append(combination + [resultado])  # concatenar esse vetor
+
+    return tabela_verdade
+
+
+
+def avaliar(equacao, variaveis: list, combination):
+    pilha_simb = []
+    pilha_var = []
+    pilha = []
+
+    parcial_equation = analise_parentese(equacao)
+
+    for logic in (parcial_equation):
+        for simb in (simbolos_plus):
+            if (logic == simb):
+                pilha_simb.append(logic)
+            else:
+                pilha_var.append(logic)
+
+    for token in parcial_equation:
+        
+        if (token == ')'):
+            while (pilha[-1] != '('):  # pilha[-1] significa o último termo do vetor pilha[]
+                pilha.append(realizar_operacao(pilha_simb.pop(), pilha_var.pop(), pilha_var.pop()))
+            
+            pilha.pop()  # remove o '('
+        
+        else:
+            pilha.append(token)
+        
+    while (len(pilha) > 1):
+        pilha.append(realizar_operacao(pilha.pop(), pilha.pop(), pilha.pop()))
+
+    return pilha[0] == "True"
+
+
+
+
+def lexical_analysis (equation):
     sum = 0
 
     for logic in (equation):
@@ -110,6 +225,25 @@ def is_well_formed_formula(input_formula):
     
     return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
+def read_matrix_T (linhas, colunas, matrix):
+
+    matrix_T = read_matrix(colunas, linhas)
+
+    for i in range(len(matrix_T)):
+        for j in range(len(matrix_T[i])):
+            matrix_T[i][j] = matrix[j][i]
+    
+    return matrix_T
+
+
+def read_matrix (linhas, colunas):
+
+    matrix = [None]*linhas
+
+    for i in range(len(matrix)):
+        matrix[i] = [None]*colunas
+    
+    return matrix
 
 
 equation = input("Digite uma equação lógica: ")
@@ -120,48 +254,53 @@ equation = remove_space(equation)
 print(equation)
 
 
-equacao_valida = bool(lexical_analysis(equation,alphabet_plus) and is_well_formed_formula(equation))
+equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation))
 print("Analisador equação:", equacao_valida)
 
-num_variables = qtd_variables(equation, alphabet)
+num_variables = qtd_variables(equation)
 combinations = generate_combinations(num_variables)
 
 print_matrix(combinations, 1)
 
-
+matriz_r = read_matrix_T(len(combinations),len(combinations[0]), combinations)
 print(combinations)
+print(matriz_r)
+
+
 
 ##################################################################################################
 #  ENTENDER COMO TRANSFORMAR EM FUNÇÃO DEPOIS
 
-def op_parentese (equation):
+def analise_parentese(equacao):
 
     pos_final = 0
     i = 0
-    equation_vetor = list(equation)
+    vetor_equacao = list(equacao)
 
-    for var in (equation_vetor):
+    for var in (vetor_equacao):
         if (var == ')' ):
             pos_final = i
         i = i + 1
 
     if (pos_final == 0):
         
-        return equation_vetor
+        parcial_equation = vetor_equacao
 
     else:
-        vet_invertido = equation[::-1]
+        vet_invertido = equacao[::-1]
         pos_inicial = 0
         i = 0
         for var in (vet_invertido):
             if(var == '(' ):
-                pos_inicial = (len(equation)-1) - i
+                pos_inicial = (len(equacao)-1) - i
             i = i + 1
 
         j = pos_inicial
-        vetor_especifico = equation[pos_inicial:pos_final+1]
+        parcial_equation = equacao[pos_inicial:pos_final+1]
+    
+    
 
-        return vetor_especifico
+        return parcial_equation
 
 
 
