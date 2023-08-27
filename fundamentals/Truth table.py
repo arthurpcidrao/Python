@@ -20,9 +20,6 @@ def realizar_operacao(operacao, valor1, valor2):
     
     elif operacao == '~':
         return negacao(valor1)
-    
-    else:
-        return valor2
 
 
 
@@ -51,7 +48,7 @@ def print_matrix (matrix, scalar):
         for j in range(len(matrix[i])):
             
             if (j < len(matrix[i]) - 1):
-                print(f"{matrix[i][j]*scalar}", end = '  |  ')
+                print(f"{matrix[i][j]*scalar}", end = '   |   ')
             else:
                 print(f"{matrix[i][j]*scalar}")
 
@@ -184,8 +181,8 @@ def is_well_formed_formula(input_formula):
     return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
 
-
-def analise (combination_n, combination_t, equation):
+"""
+def analise (combination_n, combination_t, equation, variables):
     pos_final = 0
     i = 0
 
@@ -204,7 +201,7 @@ def analise (combination_n, combination_t, equation):
 
     else:
         i = 0
-        for var in (equation[pos_final::-1]):
+        for var in (equation[pos_final::-1]):  # iterando a equation de tras pra frente
             if (var == '(' ):
                 pos_inicial = (len(equation[pos_final::-1]) - 1) - i
                 break
@@ -218,23 +215,71 @@ def analise (combination_n, combination_t, equation):
 
             i = i + 1
     
-        parcial_equation = equation[pos_inicial:pos_final+1]
-        #print(pilha_simb)
-        #print(pilha_var)
+    parcial_equation = equation[pos_inicial:pos_final+1]
+    print(pilha_simb)
+    print(pilha_var)
 
-        
+    #equation = equation[:pos_inicial] + 'i' + equation[pos_final+1:]
+    vetor = []
 
-        equation = equation[:pos_inicial] + 'i' + equation[pos_final+1:]
+    # tem que saber como juntar a variável ao vetor específico da tabela verdade
 
-
+    ordem = []
+    for letter in (pilha_var):
+        i = 0
+        for letra in (variables):
+            if (letra == letter):
+                ordem.append(i)  # teoricamente, sempre tem tamanho 2
+            i = i + 1
     
-    return equation
-
-        
-
-
+    print(ordem)
+    print(combination_t)
+    print(combination_n)
 
 
+    for j in range(len(combination_n)):
+        resultado = realizar_operacao(pilha_simb, combination_t[0][j], combination_t[1][j])
+        vetor.append(resultado)
+    
+    return vetor
+"""
+
+def analise(combination_n, combination_t, equation, variables):
+    pilha_var = []
+    pilha_simb = []
+
+    for var in equation:
+        if var in alphabet:
+            pilha_var.append(var)
+        elif var in simbolos:
+            while pilha_simb and pilha_simb[-1] != '(' and simbolos.index(pilha_simb[-1]) >= simbolos.index(var):
+                pilha_var.append(pilha_simb.pop())
+            pilha_simb.append(var)
+
+    while pilha_simb:
+        pilha_var.append(pilha_simb.pop())
+
+    vetor = []
+    for j in range(len(combination_n)):
+        resultados_var = []
+        for var in pilha_var:
+            if var in variables:
+                resultados_var.append(combination_t[variables.index(var)][j])
+            else:
+                if var == '~':
+                    resultado = realizar_operacao(var, resultados_var.pop(), 0)
+                else:
+                    resultado = realizar_operacao(var, resultados_var.pop(), resultados_var.pop())
+                resultados_var.append(resultado)
+        vetor.append(resultados_var[0])  # O resultado final da expressão está no topo da pilha
+    
+    for i in range (len(vetor)):
+        if (vetor[i] == True):
+            vetor[i] = 1
+        elif (vetor[i] == False):
+            vetor[i] = 0
+
+    return vetor
 
 
 
@@ -248,13 +293,28 @@ print(f"A equação é válida: {equacao_valida}")
 variables = qtd_variables(equation)
 num_variables = len(variables)
 combinations_n = generate_combinations(num_variables)
-combinations_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
-
-print_matrix(combinations_n, 1)
+combination_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
 qtd = qtd_operacoes(equation)
+
 print(qtd)
+print(combination_t)
+respostas = analise(combinations_n, combination_t, equation, variables)
+print(respostas)
 
+combination_t.append(respostas)  # incluindo as respostas
+print(combination_t)
+combination = read_matrix_T(len(combination_t), len(combination_t[0]), combination_t)
 
-print(combinations_n)
-print(combinations_t)
-print(analise(0,0,equation))
+variables.append(equation)
+
+print()
+for i in range(len(variables)):
+    print(variables[i], end = '       ')
+
+print()
+for i in range(len(variables)*7):
+    print('-', end = '')
+
+print()
+print_matrix(combination, 1)
+print()
