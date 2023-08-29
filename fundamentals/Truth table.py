@@ -1,7 +1,7 @@
-alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ v∨V∧~^→↔()"
+alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ vV∧~^→↔()"
 alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
-simbolos = "∨V∧~^→↔v"
-simbolos_plus = "∨V∧~^→↔v()"
+simbolos = "V∧~^→↔v"
+simbolos_plus = "V∧~^→↔v()"
 
 
 
@@ -9,7 +9,7 @@ def realizar_operacao(operacao, valor1, valor2):
     if (operacao == '∧') or (operacao == '^'):
         return conjuncao(valor1, valor2)
     
-    elif (operacao == '∨') or (operacao == 'V') or (operacao == 'v'):
+    elif (operacao == 'V') or (operacao == 'v'):
         return disjuncao(valor1, valor2)
     
     elif operacao == '→':
@@ -181,68 +181,6 @@ def is_well_formed_formula(input_formula):
     return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
 
-"""
-def analise (combination_n, combination_t, equation, variables):
-    pos_final = 0
-    i = 0
-
-    pilha_var = []
-    pilha_simb = []
-
-    for var in (equation):
-        if (var == ')' ):
-            pos_final = i
-            break
-        i = i + 1
-    
-    if (pos_final == 0):
-        
-        parcial_equation = equation
-
-    else:
-        i = 0
-        for var in (equation[pos_final::-1]):  # iterando a equation de tras pra frente
-            if (var == '(' ):
-                pos_inicial = (len(equation[pos_final::-1]) - 1) - i
-                break
-            
-            for simb in (simbolos):
-                if (simb == var):
-                    pilha_simb.append(var)
-            for letter in (alphabet):
-                if (letter == var):
-                    pilha_var.append(var)
-
-            i = i + 1
-    
-    parcial_equation = equation[pos_inicial:pos_final+1]
-    print(pilha_simb)
-    print(pilha_var)
-
-    #equation = equation[:pos_inicial] + 'i' + equation[pos_final+1:]
-    vetor = []
-
-    # tem que saber como juntar a variável ao vetor específico da tabela verdade
-
-    ordem = []
-    for letter in (pilha_var):
-        i = 0
-        for letra in (variables):
-            if (letra == letter):
-                ordem.append(i)  # teoricamente, sempre tem tamanho 2
-            i = i + 1
-    
-    print(ordem)
-    print(combination_t)
-    print(combination_n)
-
-
-    for j in range(len(combination_n)):
-        resultado = realizar_operacao(pilha_simb, combination_t[0][j], combination_t[1][j])
-        vetor.append(resultado)
-    
-    return vetor
-"""
 
 def analise(combination_n, combination_t, equation, variables):
     pilha_var = []
@@ -295,6 +233,9 @@ num_variables = len(variables)
 combinations_n = generate_combinations(num_variables)
 combination_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
 qtd = qtd_operacoes(equation)
+
+
+
 
 print(qtd)
 print(combination_t)
