@@ -1,7 +1,9 @@
-alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ v∨V∧~^→↔()"
+import ttg
+
+alphabet_plus = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ vV∧~^→↔()"
 alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
-simbolos = "∨V∧~^→↔v"
-simbolos_plus = "∨V∧~^→↔v()"
+simbolos = "V∧~^→↔v"
+simbolos_plus = "V∧~^→↔v()"
 
 
 
@@ -9,7 +11,7 @@ def realizar_operacao(operacao, valor1, valor2):
     if (operacao == '∧') or (operacao == '^'):
         return conjuncao(valor1, valor2)
     
-    elif (operacao == '∨') or (operacao == 'V') or (operacao == 'v'):
+    elif (operacao == 'V') or (operacao == 'v'):
         return disjuncao(valor1, valor2)
     
     elif operacao == '→':
@@ -20,9 +22,6 @@ def realizar_operacao(operacao, valor1, valor2):
     
     elif operacao == '~':
         return negacao(valor1)
-    
-    else:
-        return valor2
 
 
 
@@ -43,7 +42,6 @@ def negacao(valor):
 
 
 
-
 def print_matrix (matrix, scalar):
     '''
     Função usada para imprimir na tela o formato de uma matriz
@@ -52,14 +50,13 @@ def print_matrix (matrix, scalar):
         for j in range(len(matrix[i])):
             
             if (j < len(matrix[i]) - 1):
-                print(f"{matrix[i][j]*scalar}", end = '  |  ')
+                print(f"{matrix[i][j]*scalar}", end = '   |   ')
             else:
                 print(f"{matrix[i][j]*scalar}")
 
 
 
-
-def qtd_variables(equation: str) -> int:
+def qtd_variables(equation):
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
     '''
@@ -73,23 +70,30 @@ def qtd_variables(equation: str) -> int:
     vetor_sem_duplicatas = list(set(variables))  # remove duplicatas
     vetor_sem_duplicatas.sort() # ordena as variáveis
     
-    return len(vetor_sem_duplicatas)
-
-
-
-def quais_variaveis(equacao: str) -> int:
-    
-    variables = []
-
-    for logic in (equacao):
-        for letter in (alphabet):
-            if (logic == letter):
-                variables.append(logic)
-    
-    vetor_sem_duplicatas = list(set(variables))  # remove duplicatas
-    vetor_sem_duplicatas.sort() # ordena as variáveis
-    
     return vetor_sem_duplicatas
+
+
+
+def read_matrix_T (linhas, colunas, matrix):#usar para combinations
+
+    matrix_T = read_matrix(colunas, linhas)
+
+    for i in range(len(matrix_T)):
+        for j in range(len(matrix_T[i])):
+            matrix_T[i][j] = matrix[j][i]
+    
+    return matrix_T
+
+
+
+def read_matrix (linhas, colunas):
+
+    matrix = [None]*linhas
+
+    for i in range(len(matrix)):
+        matrix[i] = [None]*colunas
+    
+    return matrix
 
 
 
@@ -109,63 +113,17 @@ def generate_combinations(num_variables):
     
     return combinations
 
+
+
 def qtd_operacoes (equation):
     operacoes = 0
     
     for i in equation:
         for j in simbolos:
-            if ((i == j) and (i != '~')):
+            if (i == j):
                 operacoes = operacoes + 1
     
     return operacoes
-
-
-
-
-def analise_tab_verdade (equacao, variaveis, num_variables, operacoes):
-
-    combinations = generate_combinations(num_variables)
-
-    tabela_verdade = []
-
-    for combination in combinations:
-        resultado = avaliar(equacao, variaveis, combination)
-        tabela_verdade.append(combination + [resultado])  # concatenar esse vetor
-
-    return tabela_verdade
-
-
-
-def avaliar(equacao, variaveis: list, combination):
-    pilha_simb = []
-    pilha_var = []
-    pilha = []
-
-    parcial_equation = analise_parentese(equacao)
-
-    for logic in (parcial_equation):
-        for simb in (simbolos_plus):
-            if (logic == simb):
-                pilha_simb.append(logic)
-            else:
-                pilha_var.append(logic)
-
-    for token in parcial_equation:
-        
-        if (token == ')'):
-            while (pilha[-1] != '('):  # pilha[-1] significa o último termo do vetor pilha[]
-                pilha.append(realizar_operacao(pilha_simb.pop(), pilha_var.pop(), pilha_var.pop()))
-            
-            pilha.pop()  # remove o '('
-        
-        else:
-            pilha.append(token)
-        
-    while (len(pilha) > 1):
-        pilha.append(realizar_operacao(pilha.pop(), pilha.pop(), pilha.pop()))
-
-    return pilha[0] == "True"
-
 
 
 
@@ -182,7 +140,7 @@ def lexical_analysis (equation):
     
     else:
         return False
-
+    
 
 
 def remove_space (equation):
@@ -193,7 +151,6 @@ def remove_space (equation):
     
     equation = equation.replace(' ', '',count)
     return equation
-
 
 
 
@@ -225,122 +182,103 @@ def is_well_formed_formula(input_formula):
     
     return len(stack) == 0  # A análise sintática é bem-sucedida se a pilha estiver vazia
 
-def read_matrix_T (linhas, colunas, matrix):
 
-    matrix_T = read_matrix(colunas, linhas)
 
-    for i in range(len(matrix_T)):
-        for j in range(len(matrix_T[i])):
-            matrix_T[i][j] = matrix[j][i]
+def analise(combination_n, combination_t, equation, variables):
+    pilha_var = []
+    pilha_simb = []
+
+    for var in equation:
+        if var in alphabet:
+            pilha_var.append(var)
+        elif var in simbolos:
+            while pilha_simb and pilha_simb[-1] != '(' and simbolos.index(pilha_simb[-1]) >= simbolos.index(var):
+                pilha_var.append(pilha_simb.pop())
+            pilha_simb.append(var)
+
+    while pilha_simb:
+        pilha_var.append(pilha_simb.pop())
+
+    vetor = []
+    for j in range(len(combination_n)):
+        resultados_var = []
+        for var in pilha_var:
+            if var in variables:
+                resultados_var.append(combination_t[variables.index(var)][j])
+            else:
+                if var == '~':
+                    resultado = realizar_operacao(var, resultados_var.pop(), 0)
+                else:
+                    resultado = realizar_operacao(var, resultados_var.pop(), resultados_var.pop())
+                resultados_var.append(resultado)
+        vetor.append(resultados_var[0])  # O resultado final da expressão está no topo da pilha
     
-    return matrix_T
+    for i in range (len(vetor)):
+        if (vetor[i] == True):
+            vetor[i] = 1
+        elif (vetor[i] == False):
+            vetor[i] = 0
 
+    return vetor
 
-def read_matrix (linhas, colunas):
-
-    matrix = [None]*linhas
-
-    for i in range(len(matrix)):
-        matrix[i] = [None]*colunas
-    
-    return matrix
 
 
 equation = input("Digite uma equação lógica: ")
-
-print(equation)
-
 equation = remove_space(equation)
 print(equation)
 
+count = 0;
+for i in equation:
+    if (i == '~'):
+        #equation = equation.replace('~', '',count)
+        equation.insert(count - 1,' ')
+        equation.insert(count + 2, ' ')
+    
+    if ((i == 'v')):
+        equation = equation.replace('v', "or", count)
+        equation.insert(count - 1,' ')
+        equation.insert(count + 2, ' ')
+
+    if ((i == 'V')):
+        equation = equation.replace('V', "or", count)
+        equation.insert(count - 1,' ')
+        equation.insert(count + 2, ' ')
 
 equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation))
-print("Analisador equação:", equacao_valida)
+print(f"A equação é válida: {equacao_valida}")
 
-num_variables = qtd_variables(equation)
-combinations = generate_combinations(num_variables)
+variables = qtd_variables(equation)
+num_variables = len(variables)
 
-print_matrix(combinations, 1)
+print(variables)
 
-matriz_r = read_matrix_T(len(combinations),len(combinations[0]), combinations)
-print(combinations)
-print(matriz_r)
-
-
-
-##################################################################################################
-#  ENTENDER COMO TRANSFORMAR EM FUNÇÃO DEPOIS
-
-def analise_parentese(equacao):
-
-    pos_final = 0
-    i = 0
-    vetor_equacao = list(equacao)
-
-    for var in (vetor_equacao):
-        if (var == ')' ):
-            pos_final = i
-        i = i + 1
-
-    if (pos_final == 0):
-        
-        parcial_equation = vetor_equacao
-
-    else:
-        vet_invertido = equacao[::-1]
-        pos_inicial = 0
-        i = 0
-        for var in (vet_invertido):
-            if(var == '(' ):
-                pos_inicial = (len(equacao)-1) - i
-            i = i + 1
-
-        j = pos_inicial
-        parcial_equation = equacao[pos_inicial:pos_final+1]
-    
-    
-
-        return parcial_equation
-
-
-
-
-
-def pilhas (vetor_especifico):
-
-    pilha_simb = []
-    pilha_var = []
-
-    for logic in (vetor_especifico):
-        for letter in (alphabet):
-            if (logic == letter):
-                pilha_var.append(logic)
-            else:
-                pilha_simb.append(logic)
-
-    
-    # pilha_var , pilha_simb
-    #while (len(pilha_var) > 0 and len(pilha_simb) > 0):
-
-
-def op_pilhas (pilha_var, pilha_simb):
-    var_i = pilha_var.pop()
-    simb = pilha_simb.pop()
-    var_f = pilha_var.pop()
-
-
-
-
-
-
+print(ttg.Truths(variables))
 
 '''
- ATÉ O MOMENTO EU CONSEGUI SEPARAR A EXPRESSÃO DO PARENTESE DA PRINCIPAL, AGORA PRECISO RESOLVER A EQUAÇÃO
- MONTANDO 2 PILHAS. 1 PARA AS VARIÁVEIS E A OUTRA PARA OS SÍMBOLOS
+combinations_n = generate_combinations(num_variables)
+combination_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
+qtd = qtd_operacoes(equation)
+
+print(qtd)
+print(combination_t)
+respostas = analise(combinations_n, combination_t, equation, variables)
+print(respostas)
+
+combination_t.append(respostas)  # incluindo as respostas
+print(combination_t)
+combination = read_matrix_T(len(combination_t), len(combination_t[0]), combination_t)
+
+variables.append(equation)
+
+print()
+for i in range(len(variables)):
+    print(variables[i], end = '       ')
+
+print()
+for i in range(len(variables)*7):
+    print('-', end = '')
+
+print()
+print_matrix(combination, 1)
+print()
 '''
-
-
-# toda vez que eu entrar em um novo conjunto de parenteses, eu devo usar recursão da função para ela começar novamente
-
-# PILHA: pensar em um vetor estilo pilha de pratos (só consigo colocar e tirar por cima)
-# FILA: pensar em fila de banco (só consigo adicionar no fim da fila e retirar no começo da fila)
