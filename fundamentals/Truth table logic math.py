@@ -94,15 +94,16 @@ def check_sequence(s):
     
     return True  # Se nenhuma sequência for encontrada, retorna Verdadeiro
 
-# Função para verificar caracteres til consecutivos
+# Função para verificar caracteres
 def check_denial(s):
     # Itera através da expressão começando do segundo caractere
     for i in range(1, len(s)):
-        # Verifica se o caractere atual e o anterior são ambos "~"
-        if s[i] == "" and s[i - 1] == "":
-            return False  # Se til consecutivos forem encontrados, retorna Falso
+        # Verifica se o caractere atual é um operador lógico e o anterior é uma negação "~"
+        if s[i] in ["V", "∧", "^", "→", "↔", "v"] and s[i - 1] == "~":
+            return False  # Se o caractere e til forem consecutivos , retorna Falso
     
-    return True  # Se nenhum til consecutivo for encontrado, retorna Verdadeiro
+    return True  # Se não for encontrada a ocasião, retorna Verdadeiro
+
 
 # Função para verificar se a expressão está correta com base nas verificações
 def check_correct_expression(s):
@@ -113,6 +114,42 @@ def check_correct_expression(s):
     else:
         return False
 
+
+
+def letras_duplicadas(equation):
+    vetor = []
+    test1 = True
+    test2 = True
+    i = 0
+    while(i < len(equation) - 1):
+        if (equation[i] == equation[i+1]):
+            vetor.append(equation[i])
+        i = i + 1
+    
+    count = 0
+    if (len(vetor) > 0):
+        for j in vetor:
+            if (j == '~'):
+                count = count + 1
+    
+    if(len(vetor) == count):
+        test1 = True
+    else:
+        test1 = False
+
+    i = 0
+    while (i < len(equation) - 1):
+        j = 0
+        while (j < len(alphabet)):
+            k = 0
+            while(k < len(alphabet)):
+                if (equation[i] == alphabet[j] and equation[i+1] == alphabet[k]):
+                    test2 = False
+                k = k + 1
+            j = j + 1
+        i = i + 1
+
+    return test1 and test2
 
 
 def analise (equation, operacao):
@@ -155,9 +192,6 @@ def analise (equation, operacao):
         if (i == '~'):
             neg = neg+1
     
-    print(var)
-    print(simb)
-    print(neg)
     if ((var > 1) and (var>simb)):
         operacao.append(parcial_equation)
     elif(neg > 0):
@@ -178,7 +212,7 @@ while(n != 2):
 
     print()
 
-    equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation) and check_correct_expression(equation))
+    equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation) and check_correct_expression(equation) and letras_duplicadas(equation))
 
     if (equacao_valida):
         variables = qtd_variables(equation)
