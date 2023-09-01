@@ -7,55 +7,6 @@ simbolos_plus = "V∧~^→↔v()"
 
 
 
-def realizar_operacao(operacao, valor1, valor2):
-    if (operacao == '∧') or (operacao == '^'):
-        return conjuncao(valor1, valor2)
-    
-    elif (operacao == 'V') or (operacao == 'v'):
-        return disjuncao(valor1, valor2)
-    
-    elif operacao == '→':
-        return condicional(valor1, valor2)
-    
-    elif operacao == '↔':
-        return bicondicional(valor1, valor2)
-    
-    elif operacao == '~':
-        return negacao(valor1)
-
-
-
-def conjuncao(valor1, valor2):
-    return valor1 and valor2
-
-def disjuncao(valor1, valor2):
-    return valor1 or valor2
-
-def condicional(valor1, valor2):
-    return not valor1 or valor2
-
-def bicondicional(valor1, valor2):
-    return (not valor1 or valor2) and (not valor2 or valor1)
-
-def negacao(valor):
-    return not valor
-
-
-
-def print_matrix (matrix, scalar):
-    '''
-    Função usada para imprimir na tela o formato de uma matriz
-    '''
-    for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            
-            if (j < len(matrix[i]) - 1):
-                print(f"{matrix[i][j]*scalar}", end = '   |   ')
-            else:
-                print(f"{matrix[i][j]*scalar}")
-
-
-
 def qtd_variables(equation):
     '''
     Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
@@ -71,59 +22,6 @@ def qtd_variables(equation):
     vetor_sem_duplicatas.sort() # ordena as variáveis
     
     return vetor_sem_duplicatas
-
-
-
-def read_matrix_T (linhas, colunas, matrix):#usar para combinations
-
-    matrix_T = read_matrix(colunas, linhas)
-
-    for i in range(len(matrix_T)):
-        for j in range(len(matrix_T[i])):
-            matrix_T[i][j] = matrix[j][i]
-    
-    return matrix_T
-
-
-
-def read_matrix (linhas, colunas):
-
-    matrix = [None]*linhas
-
-    for i in range(len(matrix)):
-        matrix[i] = [None]*colunas
-    
-    return matrix
-
-
-
-def generate_combinations(num_variables):
-    '''
-    Função que realiza o início da tabela verdade e retorna a matriz inicial.
-    '''
-    combinations = []
-    max_value = 2 ** num_variables
-
-    for i in range(max_value):
-        combination = []
-        for j in range(num_variables):
-            bit = (i // (2 ** j)) % 2
-            combination.append(bit)
-        combinations.append(combination)
-    
-    return combinations
-
-
-
-def qtd_operacoes (equation):
-    operacoes = 0
-    
-    for i in equation:
-        for j in simbolos:
-            if (i == j):
-                operacoes = operacoes + 1
-    
-    return operacoes
 
 
 
@@ -184,101 +82,142 @@ def is_well_formed_formula(input_formula):
 
 
 
-def analise(combination_n, combination_t, equation, variables):
-    pilha_var = []
-    pilha_simb = []
+# Função para verificar uma sequência de símbolos permitidos
+def check_sequence(s):
+    allowed_symbols = ["V", "∧", "^", "→", "↔", "v"]
 
-    for var in equation:
-        if var in alphabet:
-            pilha_var.append(var)
-        elif var in simbolos:
-            while pilha_simb and pilha_simb[-1] != '(' and simbolos.index(pilha_simb[-1]) >= simbolos.index(var):
-                pilha_var.append(pilha_simb.pop())
-            pilha_simb.append(var)
-
-    while pilha_simb:
-        pilha_var.append(pilha_simb.pop())
-
-    vetor = []
-    for j in range(len(combination_n)):
-        resultados_var = []
-        for var in pilha_var:
-            if var in variables:
-                resultados_var.append(combination_t[variables.index(var)][j])
-            else:
-                if var == '~':
-                    resultado = realizar_operacao(var, resultados_var.pop(), 0)
-                else:
-                    resultado = realizar_operacao(var, resultados_var.pop(), resultados_var.pop())
-                resultados_var.append(resultado)
-        vetor.append(resultados_var[0])  # O resultado final da expressão está no topo da pilha
+    # Itera através da expressão
+    for i in range(len(s) - 1):
+        # Verifica se o símbolo atual e o próximo estão em allowed_symbols
+        if s[i] in allowed_symbols and s[i + 1] in allowed_symbols:
+            return False  # Se uma sequência for encontrada, retorna Falso
     
-    for i in range (len(vetor)):
-        if (vetor[i] == True):
-            vetor[i] = 1
-        elif (vetor[i] == False):
-            vetor[i] = 0
+    return True  # Se nenhuma sequência for encontrada, retorna Verdadeiro
 
-    return vetor
-
-
-
-equation = input("Digite uma equação lógica: ")
-equation = remove_space(equation)
-print(equation)
-
-count = 0;
-for i in equation:
-    if (i == '~'):
-        #equation = equation.replace('~', '',count)
-        equation.insert(count - 1,' ')
-        equation.insert(count + 2, ' ')
+# Função para verificar caracteres til consecutivos
+def check_denial(s):
+    # Itera através da expressão começando do segundo caractere
+    for i in range(1, len(s)):
+        # Verifica se o caractere atual e o anterior são ambos "~"
+        if s[i] == "" and s[i - 1] == "":
+            return False  # Se til consecutivos forem encontrados, retorna Falso
     
-    if ((i == 'v')):
-        equation = equation.replace('v', "or", count)
-        equation.insert(count - 1,' ')
-        equation.insert(count + 2, ' ')
+    return True  # Se nenhum til consecutivo for encontrado, retorna Verdadeiro
 
-    if ((i == 'V')):
-        equation = equation.replace('V', "or", count)
-        equation.insert(count - 1,' ')
-        equation.insert(count + 2, ' ')
+# Função para verificar se a expressão está correta com base nas verificações
+def check_correct_expression(s):
+    # Chama as funções check_sequence e check_denial
+    # Se ambas retornarem Verdadeiro, a expressão está correta; caso contrário, está incorreta
+    if check_sequence(s) and check_denial(s):
+        return True
+    else:
+        return False
 
-equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation))
-print(f"A equação é válida: {equacao_valida}")
 
-variables = qtd_variables(equation)
-num_variables = len(variables)
 
-print(variables)
+def analise (equation, operacao):
+    pos_final = 0
+    i = 0
 
-print(ttg.Truths(variables))
+    for var in (equation):
+        if (var == ')' ):
+            pos_final = i
+            break
+        i = i + 1
+    
+    if (pos_final == 0):
+        
+        parcial_equation = equation
 
-'''
-combinations_n = generate_combinations(num_variables)
-combination_t = read_matrix_T(len(combinations_n), len(combinations_n[0]), combinations_n)
-qtd = qtd_operacoes(equation)
+    else:
+        pos_inicial = 0
+        i = 0
+        for var in (equation[pos_final::-1]):  # iterando a equation de tras pra frente
+            if (var == '(' ):
+                pos_inicial = (len(equation[pos_final::-1]) - 1) - i
+                break
+            i = i + 1
+    
+        parcial_equation = equation[pos_inicial:pos_final+1]
+    
+    equation = equation.replace(parcial_equation, '')
 
-print(qtd)
-print(combination_t)
-respostas = analise(combinations_n, combination_t, equation, variables)
-print(respostas)
+    var = 0
+    neg = 0
+    for i in parcial_equation:
+        for j in alphabet:
+            if (i == j):
+                var = var+1
+        if (i == '~'):
+            neg = neg+1
+    
+    if (var > 1):
+        operacao.append(parcial_equation)
+    elif(neg > 0):
+        operacao.append(parcial_equation)
 
-combination_t.append(respostas)  # incluindo as respostas
-print(combination_t)
-combination = read_matrix_T(len(combination_t), len(combination_t[0]), combination_t)
+    return equation, operacao
 
-variables.append(equation)
 
-print()
-for i in range(len(variables)):
-    print(variables[i], end = '       ')
 
-print()
-for i in range(len(variables)*7):
-    print('-', end = '')
+n = 1
+while(n != 2):
 
-print()
-print_matrix(combination, 1)
-print()
-'''
+    equation = input("Digite uma equação lógica: ")
+
+    equation = remove_space(equation)
+    equation_s = equation
+
+    print()
+
+    equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation) and check_correct_expression(equation))
+
+    if (equacao_valida):
+        variables = qtd_variables(equation)
+        num_variables = len(variables)
+
+        operacao = []
+        operacoes = []
+
+        while (equation != ''):
+            equation, operacao = analise(equation, operacao)
+        
+        x = 0
+        for i in equation_s:
+            if ((i == '(' ) or (i == ')' ) ):
+                x = x + 1
+        if (x > 0):
+            operacao.append(equation_s)
+        print()
+
+        for letter in operacao:
+            for j in letter:
+            
+                if (j == 'v'):
+                    letter = letter.replace('v', " or ")
+
+                if (j == 'V'):
+                    letter = letter.replace('V', " or ")
+
+                if (j == '^'):
+                    letter = letter.replace('^', ' and ')
+                
+                if (j == '∧'):
+                    letter = letter.replace('∧', ' and ')
+                
+                if (j == '→'):
+                    letter = letter.replace('→', ' => ')
+                
+                if (j == '↔'):
+                    letter = letter.replace('↔', ' = ')
+                
+            operacoes.append(letter)
+
+        print(ttg.Truths(variables,operacoes))
+
+    else:
+        print("\nA equação está errada, digite novamente!\n")
+
+    print("Deseja continuar?\n (1) - SIM\n (2) - NÃO\n")
+    n = int(input("Resposta: "))
+    
