@@ -144,17 +144,25 @@ def analise (equation, operacao):
 
     var = 0
     neg = 0
+    simb = 0
     for i in parcial_equation:
         for j in alphabet:
             if (i == j):
                 var = var+1
+        for k in simbolos:
+            if (i == k):
+                simb = simb + 1
         if (i == '~'):
             neg = neg+1
     
-    if (var > 1):
+    print(var)
+    print(simb)
+    print(neg)
+    if ((var > 1) and (var>simb)):
         operacao.append(parcial_equation)
     elif(neg > 0):
         operacao.append(parcial_equation)
+        
 
     return equation, operacao
 
