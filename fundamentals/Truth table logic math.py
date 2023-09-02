@@ -114,7 +114,67 @@ def check_correct_expression(s):
     else:
         return False
 
+def double_negation(string):
+    resultado = []
+    i = 0
+    while i < len(string):
+        if string[i] == "~":
+            # Verifica se o próximo caractere também é "~"
+            if i + 1 < len(string) and string[i + 1] == "~":
+                # Avança dois caracteres para remover ambos
+                i += 2
+            else:
+                # Adiciona apenas um "~" ao resultado
+                resultado.append(string[i])
+                i += 1
+        else:
+            # Adiciona o caractere atual ao resultado
+            resultado.append(string[i])
+            i += 1
+    # Converte a lista de caracteres de volta para uma string
+    return "".join(resultado)
 
+def distribute(text):
+    result = ""
+    i = 0
+
+    while i < len(text):
+        if text[i] == "~" and i + 1 < len(text) and text[i + 1] == "(":
+            i += 2  # Avança além de "~("
+            open_parentheses = 1
+            j = i
+
+            while j < len(text):
+                if text[j] == "(":
+                    open_parentheses += 1
+                elif text[j] == ")":
+                    open_parentheses -= 1
+                    if open_parentheses == 0:
+                        break
+                j += 1
+
+            if j < len(text):
+                content_within_parentheses = text[i:j]  # Exclui o parêntese de fechamento
+                allowed_operators = "v∧^→↔"
+
+                for c in content_within_parentheses:
+                    if c == "~":
+                        result += c  # Mantenha a negação
+                    elif c not in allowed_operators:
+                        result += "~" + c  # Adicione uma negação antes de outros caracteres
+                    else:
+                        result += c
+
+                i = j + 1
+            else:
+                # Não encontrou o parêntese de fechamento, apenas copia o texto original
+                result += text[i - 2:i]  # Inclui "~("
+                i += 2
+        else:
+            result += text[i]
+            i += 1
+
+    return result
 
 def letras_duplicadas(equation):
     vetor = []
@@ -208,6 +268,8 @@ while(n != 2):
     equation = input("Digite uma equação lógica: ")
 
     equation = remove_space(equation)
+    equation = distribute(equation)
+    equation = double_negation(equation)
     equation_s = equation
 
     print()
@@ -262,4 +324,3 @@ while(n != 2):
 
     print("Deseja continuar?\n (1) - SIM\n (2) - NÃO\n")
     n = int(input("Resposta: "))
-    
