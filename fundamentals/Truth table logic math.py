@@ -53,11 +53,8 @@ def remove_space (equation):
 
 
 def is_well_formed_formula(input_formula):
-    # Função para remover os espaços em branco da fórmula
-    def remove_spaces(formula):
-        return formula.replace(" ", "")
     
-    input_formula = remove_spaces(input_formula)
+    input_formula = remove_space(input_formula)
     stack = []  # Usaremos uma pilha para verificar a correspondência de parênteses
     
     # Itera sobre cada caractere na fórmula de entrada
@@ -155,7 +152,7 @@ def distribute(text):
 
             if j < len(text):
                 content_within_parentheses = text[i:j]  # Exclui o parêntese de fechamento
-                allowed_operators = "v∧^→↔"
+                allowed_operators = "v∧^→↔()"
 
                 for c in content_within_parentheses:
                     if c == "~":
@@ -237,7 +234,6 @@ def analise (equation, operacao):
         operacao.append(parcial_equation)
     elif(neg > 0):
         operacao.append(parcial_equation)
-        
 
     return equation, operacao
 
@@ -249,8 +245,11 @@ while(n != 2):
     equation = input("Digite uma equação lógica: ")
 
     equation = remove_space(equation)
+    #print(equation)
     equation = distribute(equation)
+    #print(equation)
     equation = double_negation(equation)
+    #print(equation)
     equation_s = equation
 
     print()
@@ -260,6 +259,9 @@ while(n != 2):
     #print(is_well_formed_formula(equation))
     #print(check_correct_expression(equation))
     #print(letras_duplicadas(equation))
+
+    if(equation == '~' or equation[-1] == '~'):
+        equacao_valida = False
 
     if (equacao_valida):
         variables = qtd_variables(equation)
@@ -285,7 +287,7 @@ while(n != 2):
             
                 if (j == 'v'):
                     letter = letter.replace('v', " or ")
-
+ 
                 if (j == 'V'):
                     letter = letter.replace('V', " or ")
 
@@ -310,3 +312,4 @@ while(n != 2):
 
     print("Deseja continuar?\n (1) - SIM\n (2) - NÃO\n")
     n = int(input("Resposta: "))
+
