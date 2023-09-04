@@ -277,6 +277,7 @@ while(n != 2):
                 x = x + 1
         if (x > 0):
             operacao.append(equation_s)
+    
         print()
 
         for letter in operacao:
