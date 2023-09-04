@@ -9,7 +9,7 @@ simbolos_plus = "V∧~^→↔v()"
 
 def qtd_variables(equation):
     '''
-    Função usada para contar quantas variáveis (letras) há na equação\nEntrada: String\nSaída: Int
+    Função usada para contar quantas variáveis (letras) há na equação
     '''
     variables = []
 
@@ -27,7 +27,9 @@ def qtd_variables(equation):
 
 def lexical_analysis (equation):
     sum = 0
-
+    '''
+    Verifica quais caracteres da equação de entrada são encontradas na definição dos caracteres permitidos
+    '''
     for logic in (equation):
         for letter in (alphabet_plus):
             if (logic == letter):
@@ -137,13 +139,11 @@ def double_negation(string):
 def distribute(text):
     result = ""
     i = 0
-
     while i < len(text):
         if text[i] == "~" and i + 1 < len(text) and text[i + 1] == "(":
             i += 2  # Avança além de "~("
             open_parentheses = 1
             j = i
-
             while j < len(text):
                 if text[j] == "(":
                     open_parentheses += 1
@@ -152,11 +152,9 @@ def distribute(text):
                     if open_parentheses == 0:
                         break
                 j += 1
-
             if j < len(text):
                 content_within_parentheses = text[i:j]  # Exclui o parêntese de fechamento
                 allowed_operators = "v∧^→↔"
-
                 for c in content_within_parentheses:
                     if c == "~":
                         result += c  # Mantenha a negação
@@ -164,7 +162,6 @@ def distribute(text):
                         result += "~" + c  # Adicione uma negação antes de outros caracteres
                     else:
                         result += c
-
                 i = j + 1
             else:
                 # Não encontrou o parêntese de fechamento, apenas copia o texto original
@@ -215,17 +212,13 @@ def letras_duplicadas(equation):
 def analise (equation, operacao):
     pos_final = 0
     i = 0
-
     for var in (equation):
         if (var == ')' ):
             pos_final = i
             break
         i = i + 1
-    
-    if (pos_final == 0):
-        
+    if (pos_final == 0): 
         parcial_equation = equation
-
     else:
         pos_inicial = 0
         i = 0
@@ -234,11 +227,8 @@ def analise (equation, operacao):
                 pos_inicial = (len(equation[pos_final::-1]) - 1) - i
                 break
             i = i + 1
-    
         parcial_equation = equation[pos_inicial:pos_final+1]
-    
     equation = equation.replace(parcial_equation, '')
-
     var = 0
     neg = 0
     simb = 0
@@ -251,13 +241,10 @@ def analise (equation, operacao):
                 simb = simb + 1
         if (i == '~'):
             neg = neg+1
-    
     if ((var > 1) and (var>simb)):
         operacao.append(parcial_equation)
     elif(neg > 0):
-        operacao.append(parcial_equation)
-        
-
+        operacao.append(parcial_equation) 
     return equation, operacao
 
 
@@ -279,10 +266,10 @@ while(n != 2):
     if (equacao_valida):
         variables = qtd_variables(equation)
         num_variables = len(variables)
-
+        
         operacao = []
         operacoes = []
-
+        
         while (equation != ''):
             equation, operacao = analise(equation, operacao)
         
@@ -293,25 +280,19 @@ while(n != 2):
         if (x > 0):
             operacao.append(equation_s)
         print()
-
         for letter in operacao:
             for j in letter:
             
                 if (j == 'v'):
                     letter = letter.replace('v', " or ")
-
                 if (j == 'V'):
                     letter = letter.replace('V', " or ")
-
                 if (j == '^'):
                     letter = letter.replace('^', ' and ')
-                
                 if (j == '∧'):
                     letter = letter.replace('∧', ' and ')
-                
                 if (j == '→'):
                     letter = letter.replace('→', ' => ')
-                
                 if (j == '↔'):
                     letter = letter.replace('↔', ' = ')
                 
