@@ -131,16 +131,40 @@ def double_negation(string):
     # Converte a lista de caracteres de volta para uma string
     return "".join(resultado)
 
+def correction_parentheses(input_str):
+    output_str = ""
+    i = 0
+    
+    while i < len(input_str):
+        if input_str[i] == '(':
+            j = i + 1
+            while j < len(input_str) and input_str[j] == '~':
+                j += 1
+            
+            k = j
+            while k < len(input_str) and input_str[k].isalpha() and input_str[k] in alphabet:
+                k += 1
+            
+            if k < len(input_str) and input_str[k] == ')':
+                output_str += input_str[i+1:k]  # Exclui os parênteses
+                i = k + 1
+            else:
+                output_str += input_str[i]
+                i += 1
+        else:
+            output_str += input_str[i]
+            i += 1
+    
+    return output_str
+
 def distribute(text):
     result = ""
     i = 0
-
     while i < len(text):
         if text[i] == "~" and i + 1 < len(text) and text[i + 1] == "(":
             i += 2  # Avança além de "~("
             open_parentheses = 1
             j = i
-
             while j < len(text):
                 if text[j] == "(":
                     open_parentheses += 1
@@ -149,11 +173,9 @@ def distribute(text):
                     if open_parentheses == 0:
                         break
                 j += 1
-
             if j < len(text):
                 content_within_parentheses = text[i:j]  # Exclui o parêntese de fechamento
                 allowed_operators = "v∧^→↔()"
-
                 for c in content_within_parentheses:
                     if c == "~":
                         result += c  # Mantenha a negação
@@ -161,7 +183,6 @@ def distribute(text):
                         result += "~" + c  # Adicione uma negação antes de outros caracteres
                     else:
                         result += c
-
                 i = j + 1
             else:
                 # Não encontrou o parêntese de fechamento, apenas copia o texto original
@@ -170,8 +191,29 @@ def distribute(text):
         else:
             result += text[i]
             i += 1
-
     return result
+
+def formatting_parentheses(input_str):
+    output_str = ""
+    i = 0
+    
+    while i < len(input_str):
+        if input_str[i] == '~':
+            j = i + 1
+            while j < len(input_str) and input_str[j].isalpha() and input_str[j] in alphabet:
+                j += 1
+            
+            if j > i + 1:  # Se encontrou uma letra após "~"
+                output_str += f'({input_str[i:j]})'
+                i = j
+            else:
+                output_str += input_str[i]
+                i += 1
+        else:
+            output_str += input_str[i]
+            i += 1
+    
+    return output_str
 
 def letras_duplicadas(equation):
     test = True
@@ -245,22 +287,17 @@ while(n != 2):
     equation = input("Digite uma equação lógica: ")
 
     equation = remove_space(equation)
-    #print(equation)
+    equation = correction_parentheses(equation)
     equation = distribute(equation)
-    #print(equation)
     equation = double_negation(equation)
-    #print(equation)
+    equation = formatting_parentheses(equation)
     equation_s = equation
 
     print()
 
     equacao_valida = bool(lexical_analysis(equation) and is_well_formed_formula(equation) and check_correct_expression(equation) and letras_duplicadas(equation))
-    #print(lexical_analysis(equation))
-    #print(is_well_formed_formula(equation))
-    #print(check_correct_expression(equation))
-    #print(letras_duplicadas(equation))
 
-    if(equation == '~' or equation[-1] == '~'):
+    if(equation == '' or equation[-1] == ''):
         equacao_valida = False
 
     if (equacao_valida):
@@ -312,4 +349,3 @@ while(n != 2):
 
     print("Deseja continuar?\n (1) - SIM\n (2) - NÃO\n")
     n = int(input("Resposta: "))
-
