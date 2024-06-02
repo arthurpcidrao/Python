@@ -75,7 +75,7 @@ def generate_public_key(private_key):
 
 def encrypt_message(message, public_key):
     """ Criptografa uma mensagem usando a chave pública do destinatário. """
-    message_bytes = message.encode()
+    message_bytes = message.encode()  # converte a string em uma sequência de bytes
     k = generate_private_key()
     R = scalar_mult(k, (Gx, Gy))
     S = scalar_mult(k, public_key)
@@ -90,16 +90,20 @@ def encrypt_message(message, public_key):
 
 def decrypt_message(encrypted_message, private_key):
     """ Descriptografa uma mensagem usando a chave privada do destinatário. """
-    R, ciphertext = encrypted_message
-    S = scalar_mult(private_key, R)
-    xS, _ = S
+    try:
+        R, ciphertext = encrypted_message  # redireciona a tupla, R é o ponto e ciphertext é a mensagem criptografada
+        S = scalar_mult(private_key, R)
+        xS, _ = S
 
-    # Use os 16 primeiros bytes de xS como chave para XOR
-    aes_key = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
+        # Use os 16 primeiros bytes de xS como chave para XOR
+        aes_key = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
 
-    # Descriptografa a mensagem usando XOR simples
-    decrypted_message = bytes(a ^ b for a, b in zip(ciphertext, aes_key))
-    return decrypted_message.decode()
+        # Descriptografa a mensagem usando XOR simples
+        decrypted_message = bytes(a ^ b for a, b in zip(ciphertext, aes_key)) #zip cria uma tupla
+        return decrypted_message.decode()  # retorna de bytes para texto
+    except Exception as e:
+        print(f"Decryption failed: {e}")
+        return None
 
 def main():
     # Solicita ao usuário que insira uma mensagem
@@ -121,15 +125,23 @@ def main():
     encrypted_message = encrypt_message(message, receiver_public_key)
     print("Encrypted Message:", encrypted_message)
 
+    # Solicita as chaves necessárias para a descriptografia
+    receiver_private_key_input = int(input("Enter the receiver's private key in hex: "), 16)
+    sender_public_key_input_x = int(input("Enter the sender's public key X in hex: "), 16)
+    sender_public_key_input_y = int(input("Enter the sender's public key Y in hex: "), 16)
+    sender_public_key_input = (sender_public_key_input_x, sender_public_key_input_y)
+
     # Descriptografa a mensagem com a chave privada do destinatário
-    decrypted_message = decrypt_message(encrypted_message, receiver_private_key)
-    print("Decrypted Message:", decrypted_message)
-
-    # Verifica se a mensagem descriptografada é igual à mensagem original
-    if decrypted_message == message:
-        print("Decryption successful, the message matches the original.")
+    decrypted_message = decrypt_message(encrypted_message, receiver_private_key_input)
+    if decrypted_message is None:
+        print("Failed to decrypt the message.")
     else:
-        print("Decryption failed, the message does not match the original.")
+        if decrypted_message == message:
+            print("Decrypted Message:", decrypted_message)
+            print("Descriptografia feita com sucesso")
+        else:
+            print("Decrypted Message:", decrypted_message)
+            print("Descriptografia errada! A chave está incorreta")
 
-if __name__ == "__main__":
-    main()
+    
+main()
