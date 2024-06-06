@@ -131,16 +131,28 @@ def principal():
 
     # Solicita ao usuário que insira a chave privada do destinatário
     Chv = int(input("Digite a chave privada do destinatário: "), 16)
+    if(Chv==chave_privada_destinatario):
+      #Descriptografa a mensagem com a chave privada do destinatário
+      mensagem_descriptografada = descriptografar_mensagem(mensagem_criptografada, Chv)
+      print("Mensagem Descriptografada:", mensagem_descriptografada)
 
-    # Descriptografa a mensagem com a chave privada do destinatário
-    mensagem_descriptografada = descriptografar_mensagem(mensagem_criptografada, Chv)
-    print("Mensagem Descriptografada:", mensagem_descriptografada)
-
-    # Verifica se a mensagem descriptografada é igual à mensagem original
-    if mensagem_descriptografada == mensagem:
-        print("Descriptografia bem-sucedida, a mensagem corresponde à original.")
+      # Verifica se a mensagem descriptografada é igual à mensagem original
+      if mensagem_descriptografada == mensagem:
+          print("Descriptografia bem-sucedida, a mensagem corresponde à original.")
+      else:
+          print("Descriptografia falhou, a mensagem não corresponde à original.")
     else:
-        print("Descriptografia falhou, a mensagem não corresponde à original.")
+        print("Erro! Decriptogração não autorizada!")
 
 
-principal()
+    #
+
+
+i = 0
+while(i==0):
+    principal()
+    print("Deseja testar outra mensagem? \n 0)Sim \n 1)Não")
+    t = int(input())
+    if(t==1):
+        print("Desligando....")
+        i = 1

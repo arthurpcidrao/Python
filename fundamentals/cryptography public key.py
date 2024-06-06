@@ -10,138 +10,149 @@ Gx = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
 Gy = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162cb8b6fae4a13945d898c296
 N = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
 
-def inverse_mod(k, p):
+# Gera o inverso modular de k mod p
+def inverso_mod(k, p):
     """ Retorna o inverso modular de k mod p. """
     if k == 0:
-        raise ZeroDivisionError('division by zero')
+        raise ZeroDivisionError('divisão por zero')
     if k < 0:
-        return p - inverse_mod(-k, p)
+        return p - inverso_mod(-k, p)
     s, old_s = 0, 1
     t, old_t = 1, 0
     r, old_r = p, k
     while r != 0:
-        quotient = old_r // r
-        old_r, r = r, old_r - quotient * r
-        old_s, s = s, old_s - quotient * s
-        old_t, t = t, old_t - quotient * t
+        quociente = old_r // r
+        old_r, r = r, old_r - quociente * r
+        old_s, s = s, old_s - quociente * s
+        old_t, t = t, old_t - quociente * t
     return old_s % p
 
-def is_on_curve(x, y):
+# Verifica se o ponto está na curva
+def esta_na_curva(x, y):
     """ Verifica se o ponto está na curva. """
     return (y * y - x * x * x - A * x - B) % P == 0
 
-def point_add(point1, point2):
+# Adiciona os pontos na curva
+def adicionar_pontos(ponto1, ponto2):
     """ Adiciona dois pontos na curva. """
-    if point1 is None:
-        return point2
-    if point2 is None:
-        return point1
+    if ponto1 is None:
+        return ponto2
+    if ponto2 is None:
+        return ponto1
 
-    x1, y1 = point1
-    x2, y2 = point2
+    x1, y1 = ponto1
+    x2, y2 = ponto2
 
     if x1 == x2 and y1 != y2:
         return None
 
     if x1 == x2:
-        m = (3 * x1 * x1 + A) * inverse_mod(2 * y1, P)
+        m = (3 * x1 * x1 + A) * inverso_mod(2 * y1, P)
     else:
-        m = (y2 - y1) * inverse_mod(x2 - x1, P)
+        m = (y2 - y1) * inverso_mod(x2 - x1, P)
 
     x3 = m * m - x1 - x2
     y3 = m * (x1 - x3) - y1
     return (x3 % P, -y3 % P)
 
-def scalar_mult(k, point):
+# Multiplica um escalar por um ponto na curva
+def multiplicar_escalar(k, ponto):
     """ Multiplica um escalar por um ponto na curva. """
-    result = None
-    addend = point
+    resultado = None
+    somando = ponto
 
     while k:
         if k & 1:
-            result = point_add(result, addend)
-        addend = point_add(addend, addend)
+            resultado = adicionar_pontos(resultado, somando)
+        somando = adicionar_pontos(somando, somando)
         k >>= 1
 
-    return result
+    return resultado
 
-def generate_private_key():
+# Gera a chave privada
+def gerar_chave_privada():
     """ Gera uma chave privada aleatória. """
     return int(binascii.hexlify(os.urandom(32)), 16) % N
 
-def generate_public_key(private_key):
+# Gera a chave pública
+def gerar_chave_publica(chave_privada):
     """ Gera a chave pública correspondente. """
-    return scalar_mult(private_key, (Gx, Gy))
+    return multiplicar_escalar(chave_privada, (Gx, Gy))
 
-def encrypt_message(message, public_key):
+# Criptografa a mensagem
+def criptografar_mensagem(mensagem, chave_publica):
     """ Criptografa uma mensagem usando a chave pública do destinatário. """
-    message_bytes = message.encode()  # converte a string em uma sequência de bytes
-    k = generate_private_key()
-    R = scalar_mult(k, (Gx, Gy))
-    S = scalar_mult(k, public_key)
+    bytes_mensagem = mensagem.encode()
+    k = gerar_chave_privada()
+    R = multiplicar_escalar(k, (Gx, Gy))
+    S = multiplicar_escalar(k, chave_publica)
     xS, _ = S
 
     # Use os 16 primeiros bytes de xS como chave para XOR
-    aes_key = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
+    chave_aes = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
 
     # Criptografa a mensagem usando XOR simples
-    encrypted_message = bytes(a ^ b for a, b in zip(message_bytes, aes_key))
-    return (R, encrypted_message)
+    mensagem_criptografada = bytes(a ^ b for a, b in zip(bytes_mensagem, chave_aes))
+    return (R, mensagem_criptografada)
 
-def decrypt_message(encrypted_message, private_key):
+# Descriptografa a mensagem
+def descriptografar_mensagem(mensagem_criptografada, chave_privada):
     """ Descriptografa uma mensagem usando a chave privada do destinatário. """
-    try:
-        R, ciphertext = encrypted_message  # redireciona a tupla, R é o ponto e ciphertext é a mensagem criptografada
-        S = scalar_mult(private_key, R)
-        xS, _ = S
+    R, texto_cifrado = mensagem_criptografada
+    S = multiplicar_escalar(chave_privada, R)
+    xS, _ = S
 
-        # Use os 16 primeiros bytes de xS como chave para XOR
-        aes_key = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
+    # Use os 16 primeiros bytes de xS como chave para XOR
+    chave_aes = hashlib.sha256(xS.to_bytes((xS.bit_length() + 7) // 8, byteorder='big')).digest()[:16]
 
-        # Descriptografa a mensagem usando XOR simples
-        decrypted_message = bytes(a ^ b for a, b in zip(ciphertext, aes_key)) #zip cria uma tupla
-        return decrypted_message.decode()  # retorna de bytes para texto
-    except Exception as e:
-        print(f"Decryption failed: {e}")
-        return None
+    # Descriptografa a mensagem usando XOR simples
+    mensagem_descriptografada = bytes(a ^ b for a, b in zip(texto_cifrado, chave_aes))
+    return mensagem_descriptografada.decode()
 
-def main():
+def principal():
     # Solicita ao usuário que insira uma mensagem
-    message = input("Enter a message to encrypt: ")
+    mensagem = input("Digite uma mensagem para criptografar: ")
 
     # Gera as chaves do remetente
-    sender_private_key = generate_private_key()
-    sender_public_key = generate_public_key(sender_private_key)
-    print("Sender Private Key:", hex(sender_private_key))
-    print("Sender Public Key: (", hex(sender_public_key[0]), ",", hex(sender_public_key[1]), ")")
+    chave_privada_remetente = gerar_chave_privada()
+    chave_publica_remetente = gerar_chave_publica(chave_privada_remetente)
+    print("Chave Privada do Remetente:", hex(chave_privada_remetente))
+    print("Chave Pública do Remetente: (", hex(chave_publica_remetente[0]), ",", hex(chave_publica_remetente[1]), ")")
 
     # Gera as chaves do destinatário
-    receiver_private_key = generate_private_key()
-    receiver_public_key = generate_public_key(receiver_private_key)
-    print("Receiver Private Key:", hex(receiver_private_key))
-    print("Receiver Public Key: (", hex(receiver_public_key[0]), ",", hex(receiver_public_key[1]), ")")
+    chave_privada_destinatario = gerar_chave_privada()
+    chave_publica_destinatario = gerar_chave_publica(chave_privada_destinatario)
+    print("Chave Privada do Destinatário:", hex(chave_privada_destinatario))
+    print("Chave Pública do Destinatário: (", hex(chave_publica_destinatario[0]), ",", hex(chave_publica_destinatario[1]), ")")
 
     # Criptografa a mensagem com a chave pública do destinatário
-    encrypted_message = encrypt_message(message, receiver_public_key)
-    print("Encrypted Message:", encrypted_message)
+    mensagem_criptografada = criptografar_mensagem(mensagem, chave_publica_destinatario)
+    print("Mensagem Criptografada:", mensagem_criptografada)
 
-    # Solicita as chaves necessárias para a descriptografia
-    receiver_private_key_input = int(input("Enter the receiver's private key in hex: "), 16)
-    sender_public_key_input_x = int(input("Enter the sender's public key X in hex: "), 16)
-    sender_public_key_input_y = int(input("Enter the sender's public key Y in hex: "), 16)
-    sender_public_key_input = (sender_public_key_input_x, sender_public_key_input_y)
+    # Solicita ao usuário que insira a chave privada do destinatário
+    Chv = int(input("Digite a chave privada do destinatário: "), 16)
+    if(Chv==chave_privada_destinatario):
+      #Descriptografa a mensagem com a chave privada do destinatário
+      mensagem_descriptografada = descriptografar_mensagem(mensagem_criptografada, Chv)
+      print("Mensagem Descriptografada:", mensagem_descriptografada)
 
-    # Descriptografa a mensagem com a chave privada do destinatário
-    decrypted_message = decrypt_message(encrypted_message, receiver_private_key_input)
-    if decrypted_message is None:
-        print("Failed to decrypt the message.")
+      # Verifica se a mensagem descriptografada é igual à mensagem original
+      if mensagem_descriptografada == mensagem:
+          print("Descriptografia bem-sucedida, a mensagem corresponde à original.")
+      else:
+          print("Descriptografia falhou, a mensagem não corresponde à original.")
     else:
-        if decrypted_message == message:
-            print("Decrypted Message:", decrypted_message)
-            print("Descriptografia feita com sucesso")
-        else:
-            print("Decrypted Message:", decrypted_message)
-            print("Descriptografia errada! A chave está incorreta")
+        print("Erro! Decriptogração não autorizada!")
 
-    
-main()
+
+
+
+
+i = 0
+while(i==0):
+  principal()
+  print("Deseja testar outra mensagem? \n 0)Sim \n 1)Não")
+  t = int(input())
+  if(t==1):
+    print("Desligando....")
+    i = 1
